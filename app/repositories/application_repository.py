@@ -3,7 +3,12 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.enums import ApplicationStatus, ApplicationType
 from app.db.models import Application, User
-from app.utils.querytools import fetch_all_by_stmt, get_scalar_result, fetch_first_by_stmt
+from app.utils.querytools import (
+    fetch_all_by_stmt,
+    fetch_first_by_stmt,
+    get_scalar_one_result,
+    get_scalar_result,
+)
 from datetime import datetime, timezone
 
 class ApplicationRepository:
@@ -128,15 +133,13 @@ class ApplicationRepository:
 
     async def count_all(self) -> int:
         stmt = select(func.count(Application.id))
-        result = await self.session.execute(stmt)
-        return result.scalar_one()
+        return await get_scalar_one_result(self.session, stmt)
 
     async def count_pending_all(self) -> int:
         stmt = select(func.count(Application.id)).where(
             Application.status == ApplicationStatus.PENDING,
         )
-        result = await self.session.execute(stmt)
-        return result.scalar_one()
+        return await get_scalar_one_result(self.session, stmt)
 
     async def get_archive(
         self,
@@ -149,8 +152,7 @@ class ApplicationRepository:
             .limit(limit)
         )
 
-        result = await self.session.execute(stmt)
-        return list(result.scalars().all())
+        return list(await fetch_all_by_stmt(self.session, stmt))
 
     async def get_by_id_with_user_and_moderator(
         self,
@@ -165,5 +167,4 @@ class ApplicationRepository:
             .where(Application.id == application_id)
         )
 
-        result = await self.session.execute(stmt)
-        return result.scalars().first()
+        return await fetch_first_by_stmt(self.session, stmt)

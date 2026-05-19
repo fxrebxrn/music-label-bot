@@ -40,10 +40,7 @@ class RoleFilter(Filter):
         self,
         event: TelegramObject,
     ) -> None:
-        if isinstance(event, Message):
-            await event.answer("⛔ У вас нет доступа.")
-
-        elif isinstance(event, CallbackQuery):
+        if isinstance(event, CallbackQuery):
             await event.answer(
                 text="У вас нет доступа.",
                 show_alert=True,

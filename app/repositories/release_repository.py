@@ -1,7 +1,11 @@
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models import Release
-from app.utils.querytools import get_scalar_result
+from app.utils.querytools import (
+    fetch_first_by_stmt,
+    get_scalar_one_result,
+    get_scalar_result,
+)
 from typing import Any
 from datetime import date
 from app.db.enums import DistributionType, ArtistType, ReleaseFormat, ReleaseStatus
@@ -20,8 +24,7 @@ class ReleaseRepository:
         status: ReleaseStatus,
     ) -> None:
         stmt = select(Release).where(Release.id == release_id)
-        result = await self.session.execute(stmt)
-        release = result.scalars().first()
+        release = await fetch_first_by_stmt(self.session, stmt)
 
         if release is None:
             return
@@ -66,5 +69,4 @@ class ReleaseRepository:
 
     async def count_all(self) -> int:
         stmt = select(func.count(Release.id))
-        result = await self.session.execute(stmt)
-        return result.scalar_one()
+        return await get_scalar_one_result(self.session, stmt)

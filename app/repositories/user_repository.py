@@ -1,8 +1,10 @@
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models import User
-from app.utils.querytools import fetch_first_by_stmt
-from sqlalchemy import select
+from app.utils.querytools import (
+    fetch_first_by_stmt,
+    get_scalar_one_result,
+)
 from app.db.enums import UserRole
 
 class UserRepository:
@@ -35,8 +37,7 @@ class UserRepository:
 
     async def count_all(self) -> int:
         stmt = select(func.count(User.id))
-        result = await self.session.execute(stmt)
-        return result.scalar_one()
+        return await get_scalar_one_result(self.session, stmt)
 
     async def get_by_username(self, username: str) -> User | None:
         prepared_username = username.removeprefix("@").lower()
@@ -45,8 +46,7 @@ class UserRepository:
             func.lower(User.username) == prepared_username
         )
 
-        result = await self.session.execute(stmt)
-        return result.scalars().first()
+        return await fetch_first_by_stmt(self.session, stmt)
 
     async def update_role(
         self,
