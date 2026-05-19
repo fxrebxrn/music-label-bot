@@ -95,17 +95,13 @@ class ModerationService:
     ) -> str:
         status = format_application_status(application.status)
         app_type = format_application_type(application.type)
-        moderator_name = moderator.full_name
-        moderator_username = f"@{moderator.username}" if moderator.username else "без username"
         comment = application.moderator_comment or "Без комментария."
 
         return (
             f"📬 <b>По вашей заявке принято решение</b>\n\n"
             f"📄 <b>Заявка:</b> #{application.id}\n"
             f"📌 <b>Тип:</b> {app_type}\n"
-            f"📍 <b>Статус:</b> {status}\n\n"
-            f"🛡 <b>Модератор:</b> {escape(moderator_name)} "
-            f"({escape(moderator_username)})\n\n"
+            f"📍 <b>Статус:</b> {status}\n"
             f"💬 <b>Комментарий модератора:</b>\n"
             f"{escape(comment)}"
         )
